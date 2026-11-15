@@ -1,0 +1,18 @@
+name: upstream exits
+on:
+  schedule:
+    - cron: "17 6 * * 1"   # every Monday
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+  issues: write
+jobs:
+  exitradar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: hamarshehmhmd/exitradar@v0.1.0
+        with:
+          fail-on: error
+          issue: ${{ github.event_name == 'schedule' }}

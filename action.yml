@@ -1,0 +1,77 @@
+name: exitradar
+description: Find dependencies whose upstream was archived, deprecated, relicensed, acquired or shut down, with deadlines and what to move to.
+author: Mohammad Hamarsheh
+branding:
+  icon: radio
+  color: orange
+inputs:
+  paths:
+    description: space-separated directories to scan
+    required: false
+    default: "."
+  fail-on:
+    description: fail the step at this severity or worse (error, warn, info, never)
+    required: false
+    default: error
+  issue:
+    description: "open or update one issue with the report when something is found (needs `issues: write`)"
+    required: false
+    default: "false"
+  args:
+    description: extra arguments for `exitradar scan`, e.g. --stale-days 365 --feed https://example.com/feed.json
+    required: false
+    default: ""
+  token:
+    description: token for GitHub API lookups (and the issue)
+    required: false
+    default: ${{ github.token }}
+outputs:
+  errors:
+    description: number of error findings
+    value: ${{ steps.scan.outputs.errors }}
+  warnings:
+    description: number of warn findings
+    value: ${{ steps.scan.outputs.warnings }}
+runs:
+  using: composite
+  steps:
+    - uses: actions/setup-python@v6
+      with:
+        python-version: "3.12"
+    - shell: bash
+      run: python -m pip install --quiet "${{ github.action_path }}"
+    - id: scan
+      shell: bash
+      env:
+        GITHUB_TOKEN: ${{ inputs.token }}
+        ER_PATHS: ${{ inputs.paths }}
+        ER_FAIL_ON: ${{ inputs.fail-on }}
+        ER_ARGS: ${{ inputs.args }}
+      run: |
+        set +e
+        # shellcheck disable=SC2086
+        exitradar scan $ER_PATHS --format json --fail-on never $ER_ARGS > "$RUNNER_TEMP/exitradar.json"
+        # shellcheck disable=SC2086
+        exitradar scan $ER_PATHS --markdown-out "$RUNNER_TEMP/exitradar.md" --fail-on "$ER_FAIL_ON" $ER_ARGS
+        rc=$?
+        cat "$RUNNER_TEMP/exitradar.md" >> "$GITHUB_STEP_SUMMARY"
+        python - "$RUNNER_TEMP/exitradar.json" >> "$GITHUB_OUTPUT" <<'PY'
+        import json, sys
+        c = json.load(open(sys.argv[1]))["counts"]
+        print(f"errors={c['error']}\nwarnings={c['warn']}")
+        PY
+        echo "rc=$rc" >> "$GITHUB_OUTPUT"
+    - if: inputs.issue == 'true' && (steps.scan.outputs.errors != '0' || steps.scan.outputs.warnings != '0')
+      shell: bash
+      env:
+        GH_TOKEN: ${{ inputs.token }}
+      run: |
+        title="exitradar: upstream exits in this repo"
+        num=$(gh issue list --repo "$GITHUB_REPOSITORY" --state open --search "\"$title\" in:title" --json number -q '.[0].number')
+        if [ -n "$num" ]; then
+          gh issue edit "$num" --repo "$GITHUB_REPOSITORY" --body-file "$RUNNER_TEMP/exitradar.md"
+        else
+          gh issue create --repo "$GITHUB_REPOSITORY" --title "$title" --body-file "$RUNNER_TEMP/exitradar.md"
+        fi
+    - shell: bash
+      run: exit ${{ steps.scan.outputs.rc }}

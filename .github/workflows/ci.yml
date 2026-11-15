@@ -1,0 +1,64 @@
+name: CI
+on:
+  push:
+    branches: [main]
+  pull_request:
+jobs:
+  test:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest]
+        python: ["3.10", "3.11", "3.12", "3.13", "3.14"]
+        include:
+          - os: ubuntu-24.04
+            python: "3.9"
+          - os: macos-latest
+            python: "3.13"
+          - os: windows-latest
+            python: "3.13"
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: ${{ matrix.python }}
+          allow-prereleases: true
+      - run: python -m pip install -e ".[test]"
+      - run: python -m pytest -q
+  live:
+    name: live lookups (npm, PyPI, GitHub API)
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+      - run: python -m pip install -e ".[test]"
+      - run: python -m pytest -q tests/test_live.py
+        env:
+          EXITRADAR_LIVE: "1"
+          GITHUB_TOKEN: ${{ github.token }}
+  action:
+    name: GitHub Action against the example repo
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+      - name: the example repo must fail
+        id: example
+        continue-on-error: true
+        uses: ./
+        with:
+          paths: examples/acme-platform
+      - run: test "${{ steps.example.outcome }}" = failure && test "${{ steps.example.outputs.errors }}" -gt 0
+      - name: this repo itself passes (workflows + pyproject, real lookups)
+        uses: ./
+        with:
+          args: --exclude examples --exclude tests
+  install:
+    name: one-line install in a clean environment
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+      - run: pipx install .
+      - run: exitradar --version && exitradar feed && exitradar check npm:request --fail-on never

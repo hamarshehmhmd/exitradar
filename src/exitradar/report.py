@@ -1,0 +1,116 @@
+"""Text, JSON and Markdown output."""
+from __future__ import annotations
+
+import json
+import os
+import sys
+
+from . import __version__
+
+COL = {"error": "31", "warn": "33", "info": "36", "dim": "2", "bold": "1", "green": "32"}
+LABEL = {"error": "ERROR", "warn": "WARN ", "info": "INFO "}
+KIND = {"end-of-development": "end of development", "shutdown": "shutting down", "deleted": "deleted",
+        "account-gated": "account required", "retired": "retired", "archived": "archived",
+        "relicensed": "relicensed", "acquired": "acquired"}
+
+
+def use_color(stream=sys.stdout):
+    if os.environ.get("NO_COLOR"):
+        return False
+    if os.environ.get("FORCE_COLOR"):
+        return True
+    return hasattr(stream, "isatty") and stream.isatty()
+
+
+def _c(on, code, s):
+    return f"\x1b[{COL[code]}m{s}\x1b[0m" if on else s
+
+
+def counts(findings):
+    c = {"error": 0, "warn": 0, "info": 0}
+    for f in findings:
+        c[f.severity] += 1
+    return c
+
+
+def text(findings, stats, errors=(), brief=False, color=None, max_refs=3):
+    on = use_color() if color is None else color
+    out = []
+    for f in findings:
+        head = f"{_c(on, f.severity, LABEL[f.severity])} {_c(on, 'bold', f.subject)}"
+        e = f.event
+        if e:
+            bits = [KIND.get(e.get("kind"), e.get("kind", ""))]
+            if e.get("deadline"):
+                bits.append(f"deadline {e['deadline']}")
+            elif e.get("date"):
+                bits.append(e["date"])
+            head += "  " + _c(on, "dim", "[" + ", ".join(b for b in bits if b) + "]")
+        out.append(head)
+        out.append(f"      {f.message}")
+        if not brief:
+            if e:
+                out.append(_c(on, "dim", "      " + e.get("summary", "")))
+                for r in e.get("replacements", [])[:3]:
+                    out.append(f"      {_c(on, 'green', '->')} {r['name']}" + (_c(on, 'dim', f"  ({r['note']})") if r.get("note") else ""))
+                if e.get("sources"):
+                    out.append(_c(on, "dim", f"      source: {e['sources'][0]}"))
+            if f.detail.get("npm_deprecated"):
+                out.append(_c(on, "dim", f"      npm says: {f.detail['npm_deprecated']}"))
+            if f.detail.get("matched"):
+                out.append(_c(on, "dim", f"      found: {f.detail['matched']}"))
+            refs = f.refs[:max_refs]
+            more = len(f.refs) - len(refs)
+            out.append(_c(on, "dim", "      used in: " + ", ".join(refs) + (f" (+{more} more)" if more > 0 else "")))
+        else:
+            out.append(_c(on, "dim", "      " + f.refs[0] + (f" (+{len(f.refs) - 1})" if len(f.refs) > 1 else "")))
+        if not brief:
+            out.append("")
+    c = counts(findings)
+    for err in errors[:5]:
+        out.append(_c(on, "warn", "note: ") + err)
+    if len(errors) > 5:
+        out.append(_c(on, "warn", "note: ") + f"{len(errors) - 5} more lookup errors")
+    summary = (f"{stats['dependencies']} dependencies ({stats['references']} references, "
+               f"{stats['upstream_repos']} upstream repos checked): "
+               f"{_c(on, 'error', str(c['error']) + ' error')}, {_c(on, 'warn', str(c['warn']) + ' warn')}, "
+               f"{_c(on, 'info', str(c['info']) + ' info')}")
+    if not findings:
+        summary += "  " + _c(on, "green", "no upstream exits found")
+    out.append(summary)
+    return "\n".join(out)
+
+
+def as_json(findings, stats, errors=()):
+    return json.dumps({"tool": "exitradar", "version": __version__, "stats": stats, "counts": counts(findings),
+                       "findings": [f.to_dict() for f in findings], "errors": list(errors)}, indent=2)
+
+
+def markdown(findings, stats, errors=(), title="Upstream exit report"):
+    c = counts(findings)
+    lines = [f"## {title}", "",
+             f"exitradar {__version__} checked **{stats['dependencies']}** dependencies "
+             f"({stats['upstream_repos']} upstream repos): **{c['error']}** error, **{c['warn']}** warn, **{c['info']}** info.", ""]
+    if not findings:
+        lines.append("No archived, deprecated, relicensed or shut-down upstreams found.")
+        return "\n".join(lines) + "\n"
+    lines += ["| | dependency | what happened | used in | move to |", "|---|---|---|---|---|"]
+    icon = {"error": "🔴", "warn": "🟠", "info": "🔵"}
+    for f in findings:
+        e = f.event or {}
+        what = f.message
+        if e.get("deadline"):
+            what += f" (deadline {e['deadline']})"
+        if e.get("sources"):
+            what += f" [source]({e['sources'][0]})"
+        repl = "; ".join(r["name"] for r in e.get("replacements", [])[:2])
+        refs = ", ".join(f"`{r}`" for r in f.refs[:3]) + (f" +{len(f.refs) - 3}" if len(f.refs) > 3 else "")
+        lines.append(f"| {icon[f.severity]} | `{f.subject}` | {_md(what)} | {refs} | {_md(repl)} |")
+    if errors:
+        lines += ["", f"<sub>{len(errors)} lookup error(s); results may be incomplete.</sub>"]
+    lines += ["", "<sub>Generated by [exitradar](https://github.com/hamarshehmhmd/exitradar).</sub>"]
+    return "\n".join(lines) + "\n"
+
+
+def _md(s):
+    return s.replace("|", "\\|").replace("\n", " ")

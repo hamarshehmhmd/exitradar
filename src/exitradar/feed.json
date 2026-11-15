@@ -1,0 +1,548 @@
+{
+  "version": "2026-11-15",
+  "events": [
+    {
+      "id": "deno-runtime-end",
+      "title": "Deno runtime: development ends after one more year (team joined Cloudflare)",
+      "kind": "end-of-development",
+      "date": "2026-10-09",
+      "deadline": "2027-10-09",
+      "severity": "warn",
+      "summary": "The Deno team joined Cloudflare. Deno gets monthly bug-fix and security releases for one more year, then Deno Land ends development of the runtime. It stays open source.",
+      "sources": [
+        "https://deno.com/blog/cloudflare",
+        "https://news.ycombinator.com/item?id=50019911"
+      ],
+      "replacements": [
+        {
+          "name": "Node.js",
+          "note": "most Deno code with npm: specifiers ports with small changes"
+        },
+        {
+          "name": "Bun",
+          "note": "TypeScript-first runtime with Node compatibility"
+        },
+        {
+          "name": "Cloudflare Workers / workerd",
+          "note": "where the Deno team is putting future work"
+        }
+      ],
+      "match": {
+        "github": [
+          "denoland/deno"
+        ],
+        "actions": [
+          "denoland/setup-deno"
+        ],
+        "images": [
+          "denoland/deno"
+        ],
+        "runtime": [
+          "deno"
+        ]
+      }
+    },
+    {
+      "id": "deno-deploy-shutdown",
+      "title": "Deno Deploy shuts down six months after the Cloudflare deal",
+      "kind": "shutdown",
+      "date": "2026-10-09",
+      "deadline": "2027-04-09",
+      "severity": "error",
+      "summary": "Deno Deploy keeps operating for six months from Oct 9 2026, then shuts down. Paying customers get migration support to Cloudflare Workers. deployctl is already archived.",
+      "sources": [
+        "https://deno.com/blog/cloudflare"
+      ],
+      "replacements": [
+        {
+          "name": "Cloudflare Workers",
+          "note": "official migration path for paying customers"
+        },
+        {
+          "name": "Vercel, Netlify, Fly.io, Render",
+          "note": "other hosts that run JS/TS servers"
+        }
+      ],
+      "match": {
+        "github": [
+          "denoland/deployctl"
+        ],
+        "actions": [
+          "denoland/deployctl"
+        ],
+        "jsr": [
+          "@deno/deployctl"
+        ],
+        "text": [
+          "\\bdeployctl\\b",
+          "[a-z0-9-]+\\.deno\\.dev\\b",
+          "\\bdeno deploy\\b"
+        ]
+      }
+    },
+    {
+      "id": "val-town-winddown",
+      "title": "Val Town is winding down",
+      "kind": "shutdown",
+      "date": "2026-11-10",
+      "deadline": "2027-01-10",
+      "severity": "error",
+      "summary": "No new signups since Nov 10 2026. Read-only mode (except SQLite and blob storage) on Dec 10 2026, all other services end Jan 10 2027, code to be open-sourced Feb 1 2027.",
+      "sources": [
+        "https://blog.val.town/winding-down",
+        "https://news.ycombinator.com/item?id=50443427"
+      ],
+      "replacements": [
+        {
+          "name": "Cloudflare, Vercel, Netlify, Render",
+          "note": "Val Town publishes a migration guide for each"
+        }
+      ],
+      "match": {
+        "npm": [
+          "@valtown/sdk"
+        ],
+        "pypi": [
+          "valtown"
+        ],
+        "text": [
+          "\\besm\\.town/",
+          "\\bapi\\.val\\.town\\b",
+          "\\b[a-z0-9-]+(?:\\.web)?\\.val\\.run\\b"
+        ]
+      }
+    },
+    {
+      "id": "bitnami-catalog-removal",
+      "title": "Bitnami free images and charts removed from Docker Hub",
+      "kind": "deleted",
+      "date": "2025-08-28",
+      "deadline": "2025-09-29",
+      "severity": "error",
+      "summary": "Broadcom moved the free docker.io/bitnami catalog to docker.io/bitnamilegacy (frozen, no updates) and now ships only a small set of hardened 'latest' images for free. Versioned tags and the bitnamicharts OCI charts that depend on them stop getting updates or vanish.",
+      "sources": [
+        "https://github.com/bitnami/charts/issues/35164",
+        "https://community.broadcom.com/tanzu/blogs/beltran-rueda-borrego/2025/08/18/how-to-prepare-for-the-bitnami-changes-coming-soon",
+        "https://news.ycombinator.com/item?id=45048419"
+      ],
+      "replacements": [
+        {
+          "name": "the upstream project's official image/chart",
+          "note": "e.g. postgres, redis/valkey, the CloudNativePG operator"
+        },
+        {
+          "name": "docker.io/bitnamilegacy/*",
+          "note": "stopgap only: frozen, no security updates"
+        },
+        {
+          "name": "Bitnami Secure Images",
+          "note": "paid subscription from Broadcom"
+        }
+      ],
+      "match": {
+        "images": [
+          "bitnami/",
+          "docker.io/bitnami/",
+          "registry-1.docker.io/bitnami/"
+        ],
+        "helm": [
+          "charts.bitnami.com",
+          "registry-1.docker.io/bitnamicharts",
+          "docker.io/bitnamicharts"
+        ]
+      }
+    },
+    {
+      "id": "localstack-account-gated",
+      "title": "LocalStack community repo archived; running it now needs an account",
+      "kind": "account-gated",
+      "date": "2026-03-23",
+      "severity": "warn",
+      "summary": "localstack/localstack was archived and consolidated into a single image that needs a LocalStack account (free Hobby plan is non-commercial only). CI that pulls localstack/localstack without an auth token is at risk.",
+      "sources": [
+        "https://github.com/localstack/localstack",
+        "https://news.ycombinator.com/item?id=47493657"
+      ],
+      "replacements": [
+        {
+          "name": "aws/aws-emulator",
+          "note": "AWS's own local emulator of the AWS APIs (github.com/aws/aws-emulator)"
+        },
+        {
+          "name": "MiniStack",
+          "note": "MIT-licensed LocalStack replacement (github.com/ministackorg/ministack)"
+        },
+        {
+          "name": "moto (server mode)",
+          "note": "Python AWS mock, also runs as a standalone server"
+        }
+      ],
+      "match": {
+        "github": [
+          "localstack/localstack"
+        ],
+        "images": [
+          "localstack/localstack"
+        ],
+        "pypi": [
+          "localstack",
+          "localstack-core"
+        ],
+        "actions": [
+          "LocalStack/setup-localstack"
+        ]
+      }
+    },
+    {
+      "id": "ingress-nginx-retired",
+      "title": "Kubernetes ingress-nginx is retired",
+      "kind": "retired",
+      "date": "2025-11-11",
+      "deadline": "2026-03-31",
+      "severity": "error",
+      "summary": "Best-effort maintenance ended in March 2026. No more releases, bug fixes or security fixes. Existing images and charts stay available, so nothing breaks until the next CVE.",
+      "sources": [
+        "https://www.kubernetes.io/blog/2025/11/11/ingress-nginx-retirement/",
+        "https://github.com/kubernetes/ingress-nginx"
+      ],
+      "replacements": [
+        {
+          "name": "a Gateway API implementation",
+          "note": "kubernetes-sigs/ingress2gateway converts Ingress objects"
+        },
+        {
+          "name": "another maintained Ingress controller",
+          "note": "if you must stay on the Ingress API"
+        }
+      ],
+      "match": {
+        "github": [
+          "kubernetes/ingress-nginx"
+        ],
+        "images": [
+          "registry.k8s.io/ingress-nginx/",
+          "k8s.gcr.io/ingress-nginx/"
+        ],
+        "helm": [
+          "kubernetes.github.io/ingress-nginx"
+        ]
+      }
+    },
+    {
+      "id": "minio-unmaintained",
+      "title": "MinIO community edition is no longer maintained",
+      "kind": "archived",
+      "severity": "error",
+      "summary": "github.com/minio/minio is archived and its README says the repository is no longer maintained, pointing to the AIStor Free/Enterprise editions instead.",
+      "sources": [
+        "https://github.com/minio/minio"
+      ],
+      "replacements": [
+        {
+          "name": "AIStor Free",
+          "note": "MinIO's own free-license standalone edition"
+        },
+        {
+          "name": "SeaweedFS, Garage, Ceph RGW",
+          "note": "open source S3-compatible object stores"
+        }
+      ],
+      "match": {
+        "github": [
+          "minio/minio"
+        ],
+        "images": [
+          "minio/minio",
+          "quay.io/minio/minio",
+          "bitnami/minio"
+        ]
+      }
+    },
+    {
+      "id": "k8s-gcr-frozen",
+      "title": "k8s.gcr.io is frozen",
+      "kind": "deleted",
+      "date": "2023-04-03",
+      "severity": "error",
+      "summary": "The old Kubernetes image registry k8s.gcr.io stopped getting new images in April 2023 and is being shut down. Use registry.k8s.io.",
+      "sources": [
+        "https://kubernetes.io/blog/2023/03/10/image-registry-redirect/"
+      ],
+      "replacements": [
+        {
+          "name": "registry.k8s.io",
+          "note": "same image paths"
+        }
+      ],
+      "match": {
+        "images": [
+          "k8s.gcr.io/"
+        ]
+      }
+    },
+    {
+      "id": "hashicorp-busl",
+      "title": "Terraform relicensed to BUSL-1.1 (not open source)",
+      "kind": "relicensed",
+      "date": "2023-08-10",
+      "severity": "info",
+      "summary": "HashiCorp moved Terraform from MPL-2.0 to the Business Source License, which restricts competing commercial use. OpenTofu is the Linux Foundation fork of the last MPL version.",
+      "sources": [
+        "https://www.hashicorp.com/blog/hashicorp-adopts-business-source-license",
+        "https://opentofu.org/"
+      ],
+      "replacements": [
+        {
+          "name": "OpenTofu",
+          "note": "drop-in fork; opentofu/setup-opentofu for Actions"
+        }
+      ],
+      "match": {
+        "github": [
+          "hashicorp/terraform"
+        ],
+        "actions": [
+          "hashicorp/setup-terraform"
+        ],
+        "images": [
+          "hashicorp/terraform"
+        ]
+      }
+    },
+    {
+      "id": "vault-busl",
+      "title": "Vault relicensed to BUSL-1.1 (not open source)",
+      "kind": "relicensed",
+      "date": "2023-08-10",
+      "severity": "info",
+      "summary": "HashiCorp moved Vault from MPL-2.0 to the Business Source License. OpenBao is the Linux Foundation fork.",
+      "sources": [
+        "https://www.hashicorp.com/blog/hashicorp-adopts-business-source-license",
+        "https://openbao.org/"
+      ],
+      "replacements": [
+        {
+          "name": "OpenBao",
+          "note": "API-compatible fork"
+        }
+      ],
+      "match": {
+        "github": [
+          "hashicorp/vault"
+        ],
+        "images": [
+          "hashicorp/vault",
+          "vault"
+        ],
+        "actions": [
+          "hashicorp/vault-action"
+        ]
+      }
+    },
+    {
+      "id": "redis-relicense",
+      "title": "Redis relicensed (RSALv2/SSPL, AGPLv3 added in Redis 8)",
+      "kind": "relicensed",
+      "date": "2024-03-20",
+      "severity": "info",
+      "summary": "Redis left the BSD license in 2024 (RSALv2/SSPLv1). Redis 8 added AGPLv3 as a third option. Valkey is the Linux Foundation fork of the last BSD version.",
+      "sources": [
+        "https://redis.io/blog/redis-adopts-dual-source-available-licensing/",
+        "https://redis.io/blog/agplv3/"
+      ],
+      "replacements": [
+        {
+          "name": "Valkey",
+          "note": "BSD-licensed fork, image valkey/valkey"
+        }
+      ],
+      "match": {
+        "github": [
+          "redis/redis"
+        ],
+        "images": [
+          "redis"
+        ]
+      }
+    },
+    {
+      "id": "create-react-app-deprecated",
+      "title": "Create React App is deprecated",
+      "kind": "end-of-development",
+      "date": "2025-02-14",
+      "severity": "warn",
+      "summary": "The React team deprecated Create React App for new apps and put it in maintenance mode. The repo moved to react/create-react-app.",
+      "sources": [
+        "https://react.dev/blog/2025/02/14/sunsetting-create-react-app"
+      ],
+      "replacements": [
+        {
+          "name": "Vite",
+          "note": "closest drop-in for a client-side SPA"
+        },
+        {
+          "name": "a framework (Next.js, React Router)",
+          "note": "what the React team recommends"
+        }
+      ],
+      "match": {
+        "npm": [
+          "react-scripts",
+          "create-react-app"
+        ],
+        "github": [
+          "facebook/create-react-app",
+          "react/create-react-app"
+        ]
+      }
+    },
+    {
+      "id": "actions-rs-archived",
+      "title": "actions-rs/* GitHub Actions are archived",
+      "kind": "archived",
+      "severity": "warn",
+      "summary": "The actions-rs organisation's actions are archived and still run on deprecated Node runtimes and set-output.",
+      "sources": [
+        "https://github.com/actions-rs/toolchain"
+      ],
+      "replacements": [
+        {
+          "name": "dtolnay/rust-toolchain",
+          "note": "toolchain install"
+        },
+        {
+          "name": "plain `cargo` run steps + Swatinem/rust-cache",
+          "note": "replaces actions-rs/cargo"
+        }
+      ],
+      "match": {
+        "actions": [
+          "actions-rs/*"
+        ]
+      }
+    },
+    {
+      "id": "actions-release-archived",
+      "title": "actions/create-release and actions/upload-release-asset are archived",
+      "kind": "archived",
+      "severity": "warn",
+      "summary": "GitHub archived both actions in 2021; they are unmaintained.",
+      "sources": [
+        "https://github.com/actions/create-release"
+      ],
+      "replacements": [
+        {
+          "name": "gh release create",
+          "note": "the GitHub CLI is preinstalled on hosted runners"
+        },
+        {
+          "name": "softprops/action-gh-release",
+          "note": "maintained community action"
+        }
+      ],
+      "match": {
+        "actions": [
+          "actions/create-release",
+          "actions/upload-release-asset"
+        ]
+      }
+    },
+    {
+      "id": "node-sass-deprecated",
+      "title": "node-sass / LibSass are deprecated",
+      "kind": "archived",
+      "date": "2020-10-26",
+      "severity": "warn",
+      "summary": "LibSass and node-sass are deprecated and the repo is archived. Native builds break on new Node versions.",
+      "sources": [
+        "https://sass-lang.com/blog/libsass-is-deprecated/"
+      ],
+      "replacements": [
+        {
+          "name": "sass (Dart Sass)",
+          "note": "npm i -D sass; same API for most builds"
+        }
+      ],
+      "match": {
+        "npm": [
+          "node-sass"
+        ],
+        "github": [
+          "sass/node-sass"
+        ]
+      }
+    },
+    {
+      "id": "request-deprecated",
+      "title": "request is deprecated",
+      "kind": "end-of-development",
+      "date": "2020-02-11",
+      "severity": "warn",
+      "summary": "The request HTTP client was deprecated in 2020 and gets no fixes.",
+      "sources": [
+        "https://github.com/request/request/issues/3142"
+      ],
+      "replacements": [
+        {
+          "name": "fetch (built into Node 18+)",
+          "note": "or undici, got, axios"
+        }
+      ],
+      "match": {
+        "npm": [
+          "request",
+          "request-promise",
+          "request-promise-native"
+        ]
+      }
+    },
+    {
+      "id": "tslint-deprecated",
+      "title": "TSLint is deprecated",
+      "kind": "archived",
+      "date": "2019-02-19",
+      "severity": "warn",
+      "summary": "TSLint was deprecated in favour of typescript-eslint and the repo is archived.",
+      "sources": [
+        "https://github.com/palantir/tslint/issues/4534"
+      ],
+      "replacements": [
+        {
+          "name": "typescript-eslint",
+          "note": "tslint-to-eslint-config migrates rules"
+        }
+      ],
+      "match": {
+        "npm": [
+          "tslint"
+        ],
+        "github": [
+          "palantir/tslint"
+        ]
+      }
+    },
+    {
+      "id": "moment-maintenance",
+      "title": "Moment.js is in maintenance mode",
+      "kind": "end-of-development",
+      "date": "2020-09-15",
+      "severity": "info",
+      "summary": "Moment's maintainers consider it a legacy project in maintenance mode and recommend other libraries for new code.",
+      "sources": [
+        "https://momentjs.com/docs/#/-project-status/"
+      ],
+      "replacements": [
+        {
+          "name": "Luxon, date-fns, Day.js",
+          "note": "or the Temporal API where available"
+        }
+      ],
+      "match": {
+        "npm": [
+          "moment",
+          "moment-timezone"
+        ]
+      }
+    }
+  ]
+}

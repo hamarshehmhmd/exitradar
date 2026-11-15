@@ -1,0 +1,4 @@
+{
+  "tasks": { "deploy": "deployctl deploy --project=acme-edge main.ts" },
+  "imports": { "hono": "jsr:@hono/hono@^4" }
+}
