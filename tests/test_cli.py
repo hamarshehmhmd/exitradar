@@ -49,12 +49,12 @@ def test_markdown_out_and_step_summary(fake, fixture_repo, tmp_path, capsys, mon
     summ.write_text("previous\n")
     monkeypatch.setenv("GITHUB_STEP_SUMMARY", str(summ))
     cli.main(["scan", str(fixture_repo), "--offline", "--markdown-out", str(summ)])
-    md = summ.read_text()
+    md = summ.read_text(encoding="utf-8")
     assert md.startswith("previous\n## Upstream exit report")
     assert "| 🔴 | `image:bitnami/redis` |" in md
     other = tmp_path / "r.md"
     cli.main(["scan", str(fixture_repo), "--offline", "--markdown-out", str(other)])
-    assert other.read_text().startswith("## Upstream exit report")
+    assert other.read_text(encoding="utf-8").startswith("## Upstream exit report")
 
 
 def test_ignore_file(fake, tmp_path, capsys):

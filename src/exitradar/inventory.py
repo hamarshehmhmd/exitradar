@@ -346,7 +346,7 @@ def walk(root, text_patterns=(), exclude=()):
     root = os.path.abspath(root)
     out = []
     for dirpath, dirnames, filenames in os.walk(root):
-        dirnames[:] = sorted(d for d in dirnames if d not in SKIP_DIRS and not (d.startswith(".") and d not in (".github", ".gitlab", ".circleci", ".devcontainer")))
+        dirnames[:] = sorted(d for d in dirnames if d not in SKIP_DIRS and not d.endswith(".egg-info") and not (d.startswith(".") and d not in (".github", ".gitlab", ".circleci", ".devcontainer")))
         for fn in sorted(filenames):
             path = os.path.join(dirpath, fn)
             rel = os.path.relpath(path, root).replace(os.sep, "/")

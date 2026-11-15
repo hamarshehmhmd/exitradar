@@ -63,7 +63,7 @@ def cmd_scan(args):
         found = inventory.walk(root, feedmod.text_patterns(events), exclude=tuple(args.exclude or ()))
         if len(roots) > 1:
             for d in found:
-                d.file = os.path.join(os.path.basename(os.path.abspath(root)), d.file)
+                d.file = os.path.basename(os.path.abspath(root)) + "/" + d.file
         deps += found
     errors = []
     if not args.offline and not args.no_gh_token and not net.github_token():

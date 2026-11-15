@@ -200,6 +200,8 @@ def test_gemfile_and_terraform(tmp_path):
 def test_text_patterns_in_code_not_docs(tmp_path):
     w(tmp_path, "src/hook.ts", 'const u = "https://acme.web.val.run";\nimport x from "https://esm.town/v/me/x";\n')
     w(tmp_path, "README.md", "we used to deploy with deployctl\n")
+    w(tmp_path, "pkg.egg-info/PKG-INFO", "deployctl\n")
+    w(tmp_path, "notes.py", 'SAY = "Deno Deploy shuts down"\n')
     ds = deps_of(tmp_path, "text")
     assert [(d.name, d.file, d.line) for d in ds] == [("val-town-winddown", "src/hook.ts", 1)]
     assert ds[0].extra["match"] == "acme.web.val.run"
